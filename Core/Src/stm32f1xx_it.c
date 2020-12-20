@@ -21,7 +21,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f1xx_it.h"
-#include "cmsis_os.h"
+//#include "cmsis_os.h"
 #include "DS2480_driver.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -235,7 +235,7 @@ void USART1_IRQHandler(void)
 	if ((sr & USART_SR_RXNE) != RESET &&
 	(READ_REG(huart1.Instance->CR1) & USART_CR1_RXNEIE) != RESET)
 	{
-		osMessagePut(DS2480_MQ, dr & 0xff, 0);
+		//osMessagePut(DS2480_MQ, dr & 0xff, 0);
 		//osMessagePut(ctrlUART_queueHandle, dr & 0xff, 0 );
 	}
 
