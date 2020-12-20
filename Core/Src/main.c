@@ -104,11 +104,11 @@ int main(void)
 
   HAL_Delay(100);
 
-  USART_SendBreak(uart);
+  HAL_LIN_SendBreak(&huart1);
   HAL_Delay(4);
 
   uint8_t code = 0xC1;
-  HAL_UART_Transmit( &huart1, detect_frame, 5, HAL_MAX_DELAY);
+  HAL_UART_Transmit( &huart1, code, 1, HAL_MAX_DELAY);
   HAL_Delay(4);
 
   uint8_t response_frame[5];

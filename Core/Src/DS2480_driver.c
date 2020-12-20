@@ -6,27 +6,26 @@
  */
 #include "DS2480_driver.h"
 
-const uint16_t buf_size = 255;
-static uint8_t buf[buf_size];
+static uint8_t buf[BUFFER_SIZE];
 static uint16_t write_ptr = 0;
 static uint16_t read_ptr = 0;
 
-osThreadDef(ReceiveUartThread, osPriorityNormal, 1, 2000);
+//osThreadDef(ReceiveUartThread, osPriorityNormal, 1, 2000);
 
 void ReceiveUartThread(void const *argument);
 
 
 void DS2480_DriverIni()
 {
-	tid_thread1 = osThreadCreate(osThread(ReceiveUartThread), NULL);
+	//tid_thread1 = osThreadCreate(osThread(ReceiveUartThread), NULL);
 }
 
-void DS2480_Response(uint8_t responce_buffer, uint16_t size, uint16_t timeout)
+void DS2480_Response(uint8_t* responce_buffer, uint16_t size, uint16_t timeout)
 {
 	for (uint16_t i = 0; i < size; i++)
 	{
-		responce_buffer = buf[read_ptr];
-		read_ptr = (read_ptr + 1) % buf_size;
+		responce_buffer[i] = buf[read_ptr];
+		read_ptr = (read_ptr + 1) % BUFFER_SIZE;
 	}
 
 }
@@ -36,7 +35,7 @@ void DS2480_Response(uint8_t responce_buffer, uint16_t size, uint16_t timeout)
 
 void ReceiveUartThread(void const *argument)
 {
-	osEvent evt;
+	/*osEvent evt;
 	uint8_t data;
 
 	while(1){
@@ -46,7 +45,7 @@ void ReceiveUartThread(void const *argument)
 			buf[write_ptr] = data;
 			write_ptr = (write_ptr + 1) % buf_size;
 		}
-	}
+	}*/
 
 }
 
