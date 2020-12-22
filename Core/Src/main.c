@@ -19,8 +19,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 #include "fatfs.h"
-
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -48,6 +48,9 @@ TIM_HandleTypeDef htim2;
 
 UART_HandleTypeDef huart1;
 
+osThreadId defaultTaskHandle;
+osThreadId receiveUartTaskHandle;
+
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -58,6 +61,8 @@ static void MX_GPIO_Init(void);
 static void MX_SPI2_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_USART1_UART_Init(void);
+void StartDefaultTask(void const * argument);
+
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -99,32 +104,58 @@ int main(void)
   MX_TIM2_Init();
   MX_USART1_UART_Init();
   MX_FATFS_Init();
+  /* USER CODE BEGIN 2 */
 
-  DS2480_DriverIni();
+  /* USER CODE END 2 */
 
-  HAL_Delay(100);
+  /* USER CODE BEGIN RTOS_MUTEX */
+  /* add mutexes, ... */
+  /* USER CODE END RTOS_MUTEX */
 
-  HAL_LIN_SendBreak(&huart1);
-  HAL_Delay(4);
+  /* USER CODE BEGIN RTOS_SEMAPHORES */
+  /* add semaphores, ... */
+  /* USER CODE END RTOS_SEMAPHORES */
 
-  uint8_t code = 0xC1;
-  HAL_UART_Transmit( &huart1, code, 1, HAL_MAX_DELAY);
-  HAL_Delay(4);
+  /* USER CODE BEGIN RTOS_TIMERS */
+  /* start timers, add new ones, ... */
+  /* USER CODE END RTOS_TIMERS */
 
-  uint8_t response_frame[5];
+  /* USER CODE BEGIN RTOS_QUEUES */
+  /* add queues, ... */
+  DS2480_DriverIni(&huart1);
+  /* USER CODE END RTOS_QUEUES */
 
-  uint8_t detect_frame[] = {0x17, 0x45, 0x5B, 0x0F, 0x91};
-  HAL_UART_Transmit( &huart1, detect_frame, 5, HAL_MAX_DELAY);
-  HAL_Delay(4);
+  /* Create the thread(s) */
+  /* definition and creation of defaultTask */
+  osThreadDef(receiveUartTask, ReceiveUartTask, osPriorityNormal, 1, 1000);
+  receiveUartTaskHandle = osThreadCreate(osThread(receiveUartTask), NULL);
 
-  DS2480_Response(response_frame, 5, 0);
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
+  defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
+
+
+  //HAL_Delay(100);
+
+
+
+  /* USER CODE BEGIN RTOS_THREADS */
+  /* add threads, ... */
+  /* USER CODE END RTOS_THREADS */
+
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
   while (1)
   {
+    /* USER CODE END WHILE */
 
-
+    /* USER CODE BEGIN 3 */
   }
-
+  /* USER CODE END 3 */
 }
 
 /**
@@ -275,9 +306,9 @@ static void MX_USART1_UART_Init(void)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN USART1_Init 2 */
 
-  /* USER CODE END USART1_Init 2 */
+  HAL_NVIC_EnableIRQ(USART1_IRQn);
+  __HAL_UART_ENABLE_IT(&huart1, UART_IT_RXNE);
 
 }
 
@@ -321,6 +352,46 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
+
+
+
+static uint8_t detect_frame[] = {0x17, 0x45, 0x5B, 0x0F, 0x91};
+static uint8_t detect_responce_frame[5];// = {0x16, 0x44, 0x5A, 0x00, 0x93};
+
+/* USER CODE BEGIN Header_StartDefaultTask */
+/**
+  * @brief  Function implementing the defaultTask thread.
+  * @param  argument: Not used
+  * @retval None
+  */
+/* USER CODE END Header_StartDefaultTask */
+void StartDefaultTask(void const * argument)
+{
+	/*
+	HAL_UART_Receive_IT(&huart1, detect_responce_frame, 5);
+	uint8_t code = 0xC1;
+	HAL_UART_Transmit( &huart1, &code, 1, HAL_MAX_DELAY);
+	osDelay(4);
+	HAL_UART_Transmit( &huart1, detect_frame, 5, HAL_MAX_DELAY);
+	osDelay(4);
+	HAL_UART_Abort(&huart1);*/
+
+  DS2480_Run();
+
+  for(;;)
+  {
+    osDelay(1);
+  }
+
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	if(huart == &huart1)
+	{
+		uint8_t a = detect_responce_frame[0];
+	}
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.
