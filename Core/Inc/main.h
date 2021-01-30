@@ -29,8 +29,10 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f1xx_hal.h"
-#include "DS2480_driver.h"
 #include "cmsis_os.h"
+#include <ow_driver.h>
+#include <app_core.h>
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
