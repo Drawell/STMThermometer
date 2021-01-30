@@ -49,7 +49,7 @@ TIM_HandleTypeDef htim2;
 UART_HandleTypeDef huart1;
 
 osThreadId defaultTaskHandle;
-osThreadId receiveUartTaskHandle;
+osThreadId UartReadTaskHandle;
 
 /* USER CODE BEGIN PV */
 
@@ -62,6 +62,7 @@ static void MX_SPI2_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_USART1_UART_Init(void);
 void StartDefaultTask(void const * argument);
+void StartUartReadTask(void const * argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -120,24 +121,24 @@ int main(void)
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
 
+  /* Create the queue(s) */
+  /* definition and creation of UartMessageQueue */
+  osMessageQDef(UartMessageQueue, 16, uint8_t);
+  UartMessageQueueHandle = osMessageCreate(osMessageQ(UartMessageQueue), NULL);
+
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
-  DS2480_DriverIni(&huart1);
+  OWDriverInit(&huart1, 1500);
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(receiveUartTask, ReceiveUartTask, osPriorityNormal, 1, 1000);
-  receiveUartTaskHandle = osThreadCreate(osThread(receiveUartTask), NULL);
-
   osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
-
-
-  //HAL_Delay(100);
-
-
+  /* definition and creation of UartReadTask */
+  osThreadDef(UartReadTask, StartUartReadTask, osPriorityHigh, 0, 128);
+  UartReadTaskHandle = osThreadCreate(osThread(UartReadTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -309,6 +310,9 @@ static void MX_USART1_UART_Init(void)
 
   HAL_NVIC_EnableIRQ(USART1_IRQn);
   __HAL_UART_ENABLE_IT(&huart1, UART_IT_RXNE);
+  /* USER CODE BEGIN USART1_Init 2 */
+
+  /* USER CODE END USART1_Init 2 */
 
 }
 
@@ -353,11 +357,6 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE END 4 */
 
-
-
-static uint8_t detect_frame[] = {0x17, 0x45, 0x5B, 0x0F, 0x91};
-static uint8_t detect_responce_frame[5];// = {0x16, 0x44, 0x5A, 0x00, 0x93};
-
 /* USER CODE BEGIN Header_StartDefaultTask */
 /**
   * @brief  Function implementing the defaultTask thread.
@@ -367,30 +366,33 @@ static uint8_t detect_responce_frame[5];// = {0x16, 0x44, 0x5A, 0x00, 0x93};
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void const * argument)
 {
-	/*
-	HAL_UART_Receive_IT(&huart1, detect_responce_frame, 5);
-	uint8_t code = 0xC1;
-	HAL_UART_Transmit( &huart1, &code, 1, HAL_MAX_DELAY);
-	osDelay(4);
-	HAL_UART_Transmit( &huart1, detect_frame, 5, HAL_MAX_DELAY);
-	osDelay(4);
-	HAL_UART_Abort(&huart1);*/
+  AppRun();
 
-  DS2480_Run();
-
+  /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-
+  /* USER CODE END 5 */
 }
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+/* USER CODE BEGIN Header_StartUartReadTask */
+/**
+* @brief Function implementing the UartReadTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartUartReadTask */
+void StartUartReadTask(void const * argument)
 {
-	if(huart == &huart1)
-	{
-		uint8_t a = detect_responce_frame[0];
-	}
+  ReceiveUartTask(argument);
+
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END StartUartReadTask */
 }
 
 /**
