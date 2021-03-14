@@ -366,7 +366,8 @@ static void MX_GPIO_Init(void)
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void const * argument)
 {
-  AppRun();
+  /* USER CODE BEGIN 5 */
+	AppRun();
 
   /* Infinite loop */
   for(;;)
@@ -385,7 +386,8 @@ void StartDefaultTask(void const * argument)
 /* USER CODE END Header_StartUartReadTask */
 void StartUartReadTask(void const * argument)
 {
-  ReceiveUartTask(argument);
+  /* USER CODE BEGIN StartUartReadTask */
+	ReceiveUartTask(argument);
 
   /* Infinite loop */
   for(;;)
