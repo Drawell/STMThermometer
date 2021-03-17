@@ -14,12 +14,9 @@ typedef enum OW_ERROR_E {
 	UNKONWN_ERROR,
 	TIMEOUT_ERROR,
 	CHECK_CRC_ERROR,
-	SHORT_CIRCUI_ERROR,
+	SHORT_CIRCUIT_ERROR,
 	NO_SENSOR_ERROR,
 	TOO_MANY_SENSORS_ERROR,
-	SET_BAUD_ERROR,
-	DETECT_ERROR,
-
 
 } OW_ERROR_E;
 
@@ -30,7 +27,7 @@ typedef struct Sensor_t
 
 void OWDriverInit(UART_HandleTypeDef* uart_, uint16_t ms_timeout);
 
-void ReceiveUartTask(void const *argument);
+void StartUartReadTask(void const *argument);
 
 OW_ERROR_E OWStart(Sensor_t* sensors[], uint8_t size);
 OW_ERROR_E OWMeasureTemperature(Sensor_t* sensor, int16_t* temperature);
