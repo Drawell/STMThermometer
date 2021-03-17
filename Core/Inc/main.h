@@ -29,13 +29,14 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f1xx_hal.h"
-#include "cmsis_os.h"
-#include <ow_driver.h>
-#include <app_core.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "cmsis_os.h"
+#include <ow_driver.h>
+#include <app_core.h>
+#include <pc_message_sender.h>
+#include <decision_maker.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

@@ -10,6 +10,8 @@
 
 #include "cmsis_os.h"
 #include <ow_driver.h>
+#include <pc_message_sender.h>
+#include <decision_maker.h>
 
 void AppRun();
 
