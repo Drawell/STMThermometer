@@ -15,18 +15,12 @@ static int16_t write_ptr = 0;
 static int16_t read_ptr = 0;
 
 static int16_t maintaining_temperature = 2000;
-static Desison_t current_desison = TURN_OFF;
+static Desison_t current_decison = TURN_OFF;
 
 static Desison_t NoneAdaptivePredictFunc(void);
 
-PredictionMod_t predict_modes[] =
-{
-	{
-		.name = "None Adaptive",
-		.name_size = 13,
-		.funct_ptr = &NoneAdaptivePredictFunc
-	}
-};
+PredictionMod_t predict_modes[] = { { .name = "None Adaptive", .name_size = 13,
+		.funct_ptr = &NoneAdaptivePredictFunc } };
 
 static int16_t current_mode_ptr = 0;
 
@@ -36,47 +30,54 @@ void StartDecisionMakerTask(void const *argument) {
 	}
 }
 
-void DecisionMakerInit(int16_t maintaining_temperature_)
-{
+void DecisionMakerInit(int16_t maintaining_temperature_) {
 	maintaining_temperature = maintaining_temperature_;
 }
 
-void AddTemperature(int16_t temperature)
-{
+int16_t GetMaintainigTemp() {
+	return maintaining_temperature;
+}
+
+void AddTemperature(int16_t temperature) {
 	buf[INC_PTR(write_ptr)] = temperature;
 }
 
-Desison_t AskDecision(void)
-{
+Desison_t AskDecision(void) {
 	if (buf[write_ptr] >= maintaining_temperature)
+	{
+		current_decison = TURN_OFF;
 		return TURN_OFF;
+	}
 
 	return (*predict_modes[current_mode_ptr].funct_ptr)();
 }
 
-PredictionMod_t* CurrentMode(void)
-{
+PredictionMod_t* CurrentMode(void) {
 	return &predict_modes[current_mode_ptr];
 }
 
-static Desison_t NoneAdaptivePredictFunc(void)
-{
-	if (current_desison == TURN_ON) // heating
+static Desison_t NoneAdaptivePredictFunc(void) {
+
+	int16_t temp = buf[write_ptr];
+
+	if (current_decison == TURN_ON) // heating
 	{
-		if (buf[write_ptr] >= maintaining_temperature)
+		if (temp >= maintaining_temperature) {
+			current_decison = TURN_OFF;
 			return TURN_OFF;
-		else
+		} else {
+			current_decison = TURN_ON;
 			return TURN_ON;
-	}
-	else // chilling
+		}
+	} else // chilling
 	{
-		if (buf[write_ptr] <= maintaining_temperature - 200)
+		if (temp <= maintaining_temperature - 200) {
+			current_decison = TURN_ON;
 			return TURN_ON;
-		else
+		} else {
+			current_decison = TURN_OFF;
 			return TURN_OFF;
+		}
 	}
 }
-
-
-
 

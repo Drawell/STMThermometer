@@ -35,7 +35,7 @@ extern "C" {
 #include "cmsis_os.h"
 #include <ow_driver.h>
 #include <app_core.h>
-#include <pc_message_sender.h>
+#include <outworld_informer.h>
 #include <decision_maker.h>
 /* USER CODE END Includes */
 

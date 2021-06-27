@@ -29,6 +29,8 @@ void StartDecisionMakerTask(void const *argument);
 
 void DecisionMakerInit(int16_t maintaining_temperature_);
 
+int16_t GetMaintainigTemp();
+
 void AddTemperature(int16_t temperature);
 
 Desison_t AskDecision(void);

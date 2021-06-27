@@ -25,7 +25,7 @@ Message_t pcm_volotile_temperature_message =
 
 Message_t pcm_hello_message =
 {
-	.text = "Hello, PC!\n\r",
+	.text = "\n\rHello, PC!",
 	.size = 12
 };
 
@@ -47,8 +47,17 @@ Message_t pcm_error_message =
 	.size = 10
 };
 
+Message_t pcm_action_message =
+{
+	.text = "\n\rAction: ",
+	.size = 11
+};
 
 
-
+Message_t pcm_maintaining_temp_message =
+{
+	.text = "\n\rMaintaining Temp: ",
+	.size = 21
+};
 
 #endif /* INC_PC_MESSAGES_H_ */

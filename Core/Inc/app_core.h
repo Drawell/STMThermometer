@@ -10,10 +10,12 @@
 
 #include "cmsis_os.h"
 #include <ow_driver.h>
-#include <pc_message_sender.h>
 #include <decision_maker.h>
+#include <outworld_informer.h>
 
-void AppRun();
+typedef void(*SetControllingPinFunc_t)(uint8_t);
+
+void AppRun(SetControllingPinFunc_t setCtrlPinFunc_);
 
 
 
