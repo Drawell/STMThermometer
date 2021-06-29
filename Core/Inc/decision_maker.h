@@ -31,12 +31,15 @@ void DecisionMakerInit(int16_t maintaining_temperature_);
 
 int16_t GetMaintainigTemp();
 
+void ChangeMaintainingTemp(int8_t value);
+
 void AddTemperature(int16_t temperature);
 
 Desison_t AskDecision(void);
 
 PredictionMod_t* CurrentMode(void);
 
+void SelectNextMode_(void);
 
 
 #endif /* INC_DECISION_MAKER_H_ */

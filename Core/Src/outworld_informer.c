@@ -10,6 +10,7 @@
 
 static UART_HandleTypeDef *uart;
 static uint16_t timeout;
+static uint8_t is_printing = 0;
 char volotile_screen_text[40];
 
 void InitOutworldInformer(UART_HandleTypeDef *uart_, uint16_t ms_timeout) {
@@ -17,7 +18,7 @@ void InitOutworldInformer(UART_HandleTypeDef *uart_, uint16_t ms_timeout) {
 	timeout = ms_timeout;
 }
 
-void StartOutworldInformerTask(void const *argument) {
+void StartPCSendMessageTask(void const *argument) {
 	osEvent evt;
 	Message_t *message;
 
@@ -33,8 +34,9 @@ void StartOutworldInformerTask(void const *argument) {
 
 }
 
-void UpdateScreenInformation(int16_t temperature, int16_t maintaining_temperature,
-		PredictionMod_t *prediction_mode) {
+void UpdateScreenInformation(int16_t temperature,
+		int16_t maintaining_temperature, PredictionMod_t *prediction_mode) {
+
 	if (prediction_mode != NULL) {
 		//SSD1306_Clear();
 
@@ -44,14 +46,20 @@ void UpdateScreenInformation(int16_t temperature, int16_t maintaining_temperatur
 		SSD1306_Puts(volotile_screen_text, &Font_7x10, 1);
 
 		sprintf(volotile_screen_text, "Current: %d", temperature);
-		SSD1306_GotoXY(0, 20);
+		SSD1306_GotoXY(0, 16);
 		SSD1306_Puts(volotile_screen_text, &Font_7x10, 1);
 
-		SSD1306_GotoXY(0, 40);
+		SSD1306_GotoXY(0, 32);
 		SSD1306_Puts(prediction_mode->name, &Font_7x10, 1);
 
 		SSD1306_UpdateScreen();
 	}
+}
+
+void PrintError(char *error_message) {
+	SSD1306_GotoXY(0, 48);
+	SSD1306_Puts(error_message, &Font_7x10, 1);
+	SSD1306_UpdateScreen();
 }
 
 void SendHelloMessage() {

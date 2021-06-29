@@ -17,9 +17,11 @@ osMessageQId PCMessageQueueHandle;
 
 void InitOutworldInformer(UART_HandleTypeDef* uart_, uint16_t ms_timeout);
 
-void StartOutworldInformerTask(void const * argument);
+void StartPCSendMessageTask(void const * argument);
 
 void UpdateScreenInformation(int16_t temperature, int16_t maintaining_temperature, PredictionMod_t* prediction_mode);
+
+void PrintError(char* error_message);
 
 void SendHelloMessage();
 

@@ -12,18 +12,19 @@ static void TurnOnHeater();
 static void TurnOffHeater();
 static SetControllingPinFunc_t setCtrlPinFunc;
 
+static int16_t temperature;
+static PredictionMod_t *mode;
 
 void AppRun(SetControllingPinFunc_t setCtrlPinFunc_) {
 	setCtrlPinFunc = setCtrlPinFunc_;
 
 	SendHelloMessage();
-	PredictionMod_t *mode = CurrentMode();
-	int16_t maintainint_temp = GetMaintainigTemp();
+	mode = CurrentMode();
 
-	UpdateScreenInformation(0, maintainint_temp, mode);
+	UpdateScreenInformation(0, GetMaintainigTemp(), mode);
 
 	SendCurrentModMessage(mode->name, mode->name_size);
-	SendMaintainingTempMessage(maintainint_temp);
+	SendMaintainingTempMessage(GetMaintainigTemp());
 
 	Sensor_t sens1;
 	//Sensor_t sens2;
@@ -39,19 +40,20 @@ void AppRun(SetControllingPinFunc_t setCtrlPinFunc_) {
 		return;
 	}
 
-	int16_t temperature;
 	uint8_t idx = 0;
 	Desison_t desision;
 	Desison_t last_desision = TURN_ON;
 
 	for (;;) {
-		temperature = 0;
-		error = OWMeasureTemperature(sensors[idx], &temperature);
+		int16_t new_temperature = 0;
+		error = OWMeasureTemperature(sensors[idx], &new_temperature);
 		if (error != OK) {
 			HandleError(error);
-			return;
+			if (error != CHECK_CRC_ERROR)
+				return;
 		} else {
-			UpdateScreenInformation(temperature, maintainint_temp, mode);
+			temperature = new_temperature;
+			UpdateScreenInformation(temperature, GetMaintainigTemp(), mode);
 
 			SendTemperatureMessage(idx, temperature);
 			AddTemperature(temperature);
@@ -71,26 +73,46 @@ void AppRun(SetControllingPinFunc_t setCtrlPinFunc_) {
 
 }
 
+void ChangeMaintainingTemperature(int8_t direction)
+{
+	ChangeMaintainingTemp(direction);
+	UpdateScreenInformation(temperature, GetMaintainigTemp(), mode);
+}
+
+void SelectNextMode()
+{
+	SelectNextMode_();
+	mode = CurrentMode();
+	UpdateScreenInformation(temperature, GetMaintainigTemp(), mode);
+	SendCurrentModMessage(mode->name, mode->name_size);
+}
+
 static void HandleError(OW_ERROR_E error) {
 	switch (error) {
 	case TIMEOUT_ERROR:
 		SendErrorMessage("timeout\r\n", 10);
+		PrintError("timeout error");
 		break;
 	case CHECK_CRC_ERROR:
 		SendErrorMessage("check crc\r\n", 12);
+		PrintError("check crc error");
 		break;
 	case SHORT_CIRCUIT_ERROR:
 		SendErrorMessage("short circuit\r\n", 16);
+		PrintError("short circuit");
 		break;
 	case NO_SENSOR_ERROR:
 		SendErrorMessage("no sensors\r\n", 15);
+		PrintError("no sensors");
 		break;
 	case TOO_MANY_SENSORS_ERROR:
 		SendErrorMessage("too many sensors\r\n", 19);
+		PrintError("too many sensors");
 		break;
 	case UNKONWN_ERROR:
 	default:
 		SendErrorMessage("unknown\r\n", 10);
+		PrintError("unknown error");
 	}
 
 }
