@@ -71,22 +71,18 @@ void AppRun(SetControllingPinFunc_t setCtrlPinFunc_) {
 
 }
 
-void ChangeMaintainingTemperature(int8_t direction)
-{
-	ChangeMaintainingTemp(direction);
-	PrintMaintaningTemperature(GetMaintainigTemp());
-}
-
 void IncreaseMaintainingTemperature(void)
 {
 	ChangeMaintainingTemp(1);
 	PrintMaintaningTemperature(GetMaintainigTemp());
+	SendMaintainingTempMessage(GetMaintainigTemp());
 }
 
 void DecreaseMaintainingTemperature(void)
 {
 	ChangeMaintainingTemp(-1);
 	PrintMaintaningTemperature(GetMaintainigTemp());
+	SendMaintainingTempMessage(GetMaintainigTemp());
 }
 
 void SelectNextMode(void)

@@ -17,6 +17,8 @@ typedef struct Message_t
 } Message_t;
 
 uint8_t volotile_temperature_message_text[30];
+uint8_t volotile_maintaining_temperature_message_text[30];
+
 Message_t pcm_volotile_temperature_message =
 {
 	.text = &volotile_temperature_message_text,
@@ -56,8 +58,8 @@ Message_t pcm_action_message =
 
 Message_t pcm_maintaining_temp_message =
 {
-	.text = "\n\rMaintaining Temp: ",
-	.size = 21
+	.text = volotile_maintaining_temperature_message_text,
+	.size = 30
 };
 
 #endif /* INC_PC_MESSAGES_H_ */

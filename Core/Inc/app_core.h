@@ -17,8 +17,6 @@ typedef void(*SetControllingPinFunc_t)(uint8_t);
 
 void AppRun(SetControllingPinFunc_t setCtrlPinFunc_);
 
-void ChangeMaintainingTemperature(int8_t direction);
-
 void IncreaseMaintainingTemperature(void);
 
 void DecreaseMaintainingTemperature(void);

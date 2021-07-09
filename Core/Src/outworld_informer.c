@@ -114,7 +114,6 @@ void SendActionMessage(char *text, uint8_t size) {
 }
 
 void SendMaintainingTempMessage(int16_t temperature) {
-	sprintf(&volotile_temperature_message_text, "%d", temperature);
+	sprintf(&volotile_maintaining_temperature_message_text, "\n\rMaintaining Temp: %d", temperature);
 	osMessagePut(PCMessageQueueHandle, &pcm_maintaining_temp_message, 0);
-	osMessagePut(PCMessageQueueHandle, &pcm_volotile_temperature_message, 0);
 }
