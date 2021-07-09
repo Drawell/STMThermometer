@@ -37,6 +37,7 @@ extern "C" {
 #include <app_core.h>
 #include <outworld_informer.h>
 #include <decision_maker.h>
+#include <encoder.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

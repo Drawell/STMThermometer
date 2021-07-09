@@ -19,9 +19,15 @@ void InitOutworldInformer(UART_HandleTypeDef* uart_, uint16_t ms_timeout);
 
 void StartPCSendMessageTask(void const * argument);
 
-void UpdateScreenInformation(int16_t temperature, int16_t maintaining_temperature, PredictionMod_t* prediction_mode);
+void StartDisplayPrintTask(void const * argument);
 
-void PrintError(char* error_message);
+void PrintTemperature(int16_t temperature);
+
+void PrintMaintaningTemperature(int16_t maintaining_temperature);
+
+void PrintPredictionMode(PredictionMod_t* prediction_mode);
+
+void PrintErrorMessage(char* error_message);
 
 void SendHelloMessage();
 

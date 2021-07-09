@@ -21,17 +21,15 @@ void AppRun(SetControllingPinFunc_t setCtrlPinFunc_) {
 	SendHelloMessage();
 	mode = CurrentMode();
 
-	UpdateScreenInformation(0, GetMaintainigTemp(), mode);
+	PrintPredictionMode(mode);
+	PrintMaintaningTemperature(GetMaintainigTemp());
 
 	SendCurrentModMessage(mode->name, mode->name_size);
 	SendMaintainingTempMessage(GetMaintainigTemp());
 
 	Sensor_t sens1;
-	//Sensor_t sens2;
-
 	Sensor_t *sensors[1];
 	sensors[0] = &sens1;
-	//sensors[1] = &sens2;
 
 	OW_ERROR_E error;
 	error = OWStart(sensors, 1);
@@ -53,7 +51,7 @@ void AppRun(SetControllingPinFunc_t setCtrlPinFunc_) {
 				return;
 		} else {
 			temperature = new_temperature;
-			UpdateScreenInformation(temperature, GetMaintainigTemp(), mode);
+			PrintTemperature(temperature);
 
 			SendTemperatureMessage(idx, temperature);
 			AddTemperature(temperature);
@@ -76,14 +74,26 @@ void AppRun(SetControllingPinFunc_t setCtrlPinFunc_) {
 void ChangeMaintainingTemperature(int8_t direction)
 {
 	ChangeMaintainingTemp(direction);
-	UpdateScreenInformation(temperature, GetMaintainigTemp(), mode);
+	PrintMaintaningTemperature(GetMaintainigTemp());
 }
 
-void SelectNextMode()
+void IncreaseMaintainingTemperature(void)
+{
+	ChangeMaintainingTemp(1);
+	PrintMaintaningTemperature(GetMaintainigTemp());
+}
+
+void DecreaseMaintainingTemperature(void)
+{
+	ChangeMaintainingTemp(-1);
+	PrintMaintaningTemperature(GetMaintainigTemp());
+}
+
+void SelectNextMode(void)
 {
 	SelectNextMode_();
 	mode = CurrentMode();
-	UpdateScreenInformation(temperature, GetMaintainigTemp(), mode);
+	PrintPredictionMode(mode);
 	SendCurrentModMessage(mode->name, mode->name_size);
 }
 
@@ -91,28 +101,28 @@ static void HandleError(OW_ERROR_E error) {
 	switch (error) {
 	case TIMEOUT_ERROR:
 		SendErrorMessage("timeout\r\n", 10);
-		PrintError("timeout error");
+		PrintErrorMessage("timeout error");
 		break;
 	case CHECK_CRC_ERROR:
 		SendErrorMessage("check crc\r\n", 12);
-		PrintError("check crc error");
+		PrintErrorMessage("check crc error");
 		break;
 	case SHORT_CIRCUIT_ERROR:
 		SendErrorMessage("short circuit\r\n", 16);
-		PrintError("short circuit");
+		PrintErrorMessage("short circuit");
 		break;
 	case NO_SENSOR_ERROR:
 		SendErrorMessage("no sensors\r\n", 15);
-		PrintError("no sensors");
+		PrintErrorMessage("no sensors");
 		break;
 	case TOO_MANY_SENSORS_ERROR:
 		SendErrorMessage("too many sensors\r\n", 19);
-		PrintError("too many sensors");
+		PrintErrorMessage("too many sensors");
 		break;
 	case UNKONWN_ERROR:
 	default:
 		SendErrorMessage("unknown\r\n", 10);
-		PrintError("unknown error");
+		PrintErrorMessage("unknown error");
 	}
 
 }

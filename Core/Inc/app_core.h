@@ -19,6 +19,10 @@ void AppRun(SetControllingPinFunc_t setCtrlPinFunc_);
 
 void ChangeMaintainingTemperature(int8_t direction);
 
-void SelectNextMode();
+void IncreaseMaintainingTemperature(void);
+
+void DecreaseMaintainingTemperature(void);
+
+void SelectNextMode(void);
 
 #endif /* APP_CORE_H_ */

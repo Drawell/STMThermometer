@@ -12,6 +12,11 @@ static UART_HandleTypeDef *uart;
 static uint16_t timeout;
 static uint8_t is_printing = 0;
 char volotile_screen_text[40];
+char volotile_error_text[40];
+
+int16_t temperature_ = 0;
+int16_t maintaining_temperature_ = 0;
+PredictionMod_t *prediction_mode_ = NULL;
 
 void InitOutworldInformer(UART_HandleTypeDef *uart_, uint16_t ms_timeout) {
 	uart = uart_;
@@ -34,32 +39,46 @@ void StartPCSendMessageTask(void const *argument) {
 
 }
 
-void UpdateScreenInformation(int16_t temperature,
-		int16_t maintaining_temperature, PredictionMod_t *prediction_mode) {
+void StartDisplayPrintTask(void const *argument) {
+	for (;;) {
+		if (prediction_mode_ != NULL) {
+			//SSD1306_Clear();
 
-	if (prediction_mode != NULL) {
-		//SSD1306_Clear();
+			sprintf(volotile_screen_text, "Maintaining: %d",
+					maintaining_temperature_);
+			SSD1306_GotoXY(0, 0);
+			SSD1306_Puts(volotile_screen_text, &Font_7x10, 1);
 
-		sprintf(volotile_screen_text, "Maintaining: %d",
-				maintaining_temperature);
-		SSD1306_GotoXY(0, 0);
-		SSD1306_Puts(volotile_screen_text, &Font_7x10, 1);
+			sprintf(volotile_screen_text, "Current: %d", temperature_);
+			SSD1306_GotoXY(0, 16);
+			SSD1306_Puts(volotile_screen_text, &Font_7x10, 1);
 
-		sprintf(volotile_screen_text, "Current: %d", temperature);
-		SSD1306_GotoXY(0, 16);
-		SSD1306_Puts(volotile_screen_text, &Font_7x10, 1);
+			SSD1306_GotoXY(0, 32);
+			SSD1306_Puts(prediction_mode_->name, &Font_7x10, 1);
 
-		SSD1306_GotoXY(0, 32);
-		SSD1306_Puts(prediction_mode->name, &Font_7x10, 1);
+			SSD1306_GotoXY(0, 48);
+			SSD1306_Puts(volotile_error_text, &Font_7x10, 1);
 
-		SSD1306_UpdateScreen();
+			SSD1306_UpdateScreen();
+		}
+
+		osDelay(100);
 	}
 }
+void PrintTemperature(int16_t temperature) {
+	temperature_ = temperature;
+}
 
-void PrintError(char *error_message) {
-	SSD1306_GotoXY(0, 48);
-	SSD1306_Puts(error_message, &Font_7x10, 1);
-	SSD1306_UpdateScreen();
+void PrintMaintaningTemperature(int16_t maintaining_temperature) {
+	maintaining_temperature_ = maintaining_temperature;
+}
+
+void PrintPredictionMode(PredictionMod_t *prediction_mode) {
+	prediction_mode_ = prediction_mode;
+}
+
+void PrintErrorMessage(char *error_message) {
+	strcpy(volotile_error_text, error_message);
 }
 
 void SendHelloMessage() {
