@@ -27,6 +27,8 @@ void PrintMaintaningTemperature(int16_t maintaining_temperature);
 
 void PrintPredictionMode(PredictionMod_t* prediction_mode);
 
+void PrintPower(uint8_t power);
+
 void PrintErrorMessage(char* error_message);
 
 void SendHelloMessage();
@@ -37,7 +39,7 @@ void SendCurrentModMessage(char* mod_name, uint8_t name_size);
 
 void SendErrorMessage(char* text, uint8_t size);
 
-void SendActionMessage(char* text, uint8_t size);
+void SendPowerMessage(uint8_t power);
 
 void SendMaintainingTempMessage(int16_t temperature);
 

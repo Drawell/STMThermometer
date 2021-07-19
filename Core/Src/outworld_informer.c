@@ -10,13 +10,13 @@
 
 static UART_HandleTypeDef *uart;
 static uint16_t timeout;
-static uint8_t is_printing = 0;
-char volotile_screen_text[40];
-char volotile_error_text[40];
+char volotile_screen_text[20];
+char volotile_error_text[20] = "\0";
 
 int16_t temperature_ = 0;
 int16_t maintaining_temperature_ = 0;
 PredictionMod_t *prediction_mode_ = NULL;
+uint16_t power_ = 0;
 
 void InitOutworldInformer(UART_HandleTypeDef *uart_, uint16_t ms_timeout) {
 	uart = uart_;
@@ -44,25 +44,35 @@ void StartDisplayPrintTask(void const *argument) {
 		if (prediction_mode_ != NULL) {
 			//SSD1306_Clear();
 
-			sprintf(volotile_screen_text, "Maintaining: %d",
-					maintaining_temperature_);
-			SSD1306_GotoXY(0, 0);
-			SSD1306_Puts(volotile_screen_text, &Font_7x10, 1);
+			if (volotile_error_text[0]) {
 
-			sprintf(volotile_screen_text, "Current: %d", temperature_);
-			SSD1306_GotoXY(0, 16);
-			SSD1306_Puts(volotile_screen_text, &Font_7x10, 1);
+				SSD1306_GotoXY(0, 0);
+				SSD1306_Puts(volotile_error_text, &Font_7x10, 1);
+			} else {
 
-			SSD1306_GotoXY(0, 32);
-			SSD1306_Puts(prediction_mode_->name, &Font_7x10, 1);
+				sprintf(volotile_screen_text, "Maintaining: %d   ",
+						maintaining_temperature_);
+				SSD1306_GotoXY(0, 0);
+				SSD1306_Puts(volotile_screen_text, &Font_7x10, 1);
 
-			SSD1306_GotoXY(0, 48);
-			SSD1306_Puts(volotile_error_text, &Font_7x10, 1);
+				sprintf(volotile_screen_text, "Current: %d   ", temperature_);
+				SSD1306_GotoXY(0, 16);
+				SSD1306_Puts(volotile_screen_text, &Font_7x10, 1);
+
+				sprintf(volotile_screen_text, "Power: %d   ", power_);
+				SSD1306_GotoXY(0, 32);
+				SSD1306_Puts(volotile_screen_text, &Font_7x10, 1);
+
+				SSD1306_GotoXY(0, 48);
+				SSD1306_Puts(prediction_mode_->name, &Font_7x10, 1);
+				for (uint8_t i = prediction_mode_->name_size; i < 20; i++)
+					SSD1306_Puts(" ", &Font_7x10, 1);
+			}
 
 			SSD1306_UpdateScreen();
 		}
 
-		osDelay(100);
+		osDelay(200);
 	}
 }
 void PrintTemperature(int16_t temperature) {
@@ -75,6 +85,9 @@ void PrintMaintaningTemperature(int16_t maintaining_temperature) {
 
 void PrintPredictionMode(PredictionMod_t *prediction_mode) {
 	prediction_mode_ = prediction_mode;
+}
+void PrintPower(uint8_t power) {
+	power_ = power;
 }
 
 void PrintErrorMessage(char *error_message) {
@@ -106,14 +119,13 @@ void SendErrorMessage(char *text, uint8_t size) {
 	osMessagePut(PCMessageQueueHandle, &pcm_volotile_message, 0);
 }
 
-void SendActionMessage(char *text, uint8_t size) {
-	pcm_volotile_message.text = text;
-	pcm_volotile_message.size = size;
-	osMessagePut(PCMessageQueueHandle, &pcm_action_message, 0);
-	osMessagePut(PCMessageQueueHandle, &pcm_volotile_message, 0);
+void SendPowerMessage(uint8_t power) {
+	sprintf(&volotile_power_message_text, "\n\rPower: %d", power);
+	osMessagePut(PCMessageQueueHandle, &pcm_power_message, 0);
 }
 
 void SendMaintainingTempMessage(int16_t temperature) {
-	sprintf(&volotile_maintaining_temperature_message_text, "\n\rMaintaining Temp: %d", temperature);
+	sprintf(&volotile_maintaining_temperature_message_text,
+			"\n\rMaintaining Temp: %d", temperature);
 	osMessagePut(PCMessageQueueHandle, &pcm_maintaining_temp_message, 0);
 }

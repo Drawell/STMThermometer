@@ -53,10 +53,6 @@ void ENCODER_isr_callback(ENCODER_Handle_t *henc, uint16_t GPIO_pin) {
 			}
 		}
 	}
-	else
-	{
-		int a = 0;
-	}
 }
 
 void ENCODER_mute_timer_callback(ENCODER_Handle_t *henc) {

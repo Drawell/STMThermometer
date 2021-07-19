@@ -38,6 +38,7 @@ extern "C" {
 #include <outworld_informer.h>
 #include <decision_maker.h>
 #include <encoder.h>
+#include <dimmer.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -52,7 +53,8 @@ extern "C" {
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-
+ENCODER_Handle_t encoder;
+DIMMER_Handle_t dimmer;
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/

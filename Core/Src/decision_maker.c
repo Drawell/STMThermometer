@@ -10,24 +10,32 @@
 #define ADD_PTR(ptr, len) (ptr = (ptr + len) % TEMP_BUFFER_SIZE)
 #define LEN(ptr1, ptr2) (ptr1) < (ptr2) ? ((ptr2) - (ptr1)) : ((ptr2) + TEMP_BUFFER_SIZE - (ptr1))
 
+#define MINIMAL_MAINTAINING_TEMPERATURE 2000
+#define MAXIMAL_MAINTAINING_TEMPERATURE 10000
+
 static int16_t buf[TEMP_BUFFER_SIZE];
 static int16_t write_ptr = 0;
 static int16_t read_ptr = 0;
 
 static int16_t maintaining_temperature = 2000;
-static Desison_t current_decison = TURN_OFF;
+static uint8_t power = 0;
+static uint8_t is_calculated = 0;
 
-static Desison_t NoneAdaptivePredictFunc(void);
+static uint8_t NaivePredictFunc(void);
 
-PredictionMod_t predict_modes[] = { { .name = "None Adaptive", .name_size = 13,
-		.funct_ptr = &NoneAdaptivePredictFunc }, { .name = "Second Mode   ",
-		.name_size = 15, .funct_ptr = &NoneAdaptivePredictFunc } };
+PredictionMod_t predict_modes[] = { { .name = "Naive", .name_size = 6,
+		.funct_ptr = &NaivePredictFunc }, { .name = "1234567890123457890",
+		.name_size = 15, .funct_ptr = &NaivePredictFunc } };
 
 static int16_t current_mode_ptr = 0;
 
 void StartDecisionMakerTask(void const *argument) {
 	for (;;) {
-
+		if (!is_calculated)
+		{
+			power = (*predict_modes[current_mode_ptr].funct_ptr)();
+			is_calculated = 1;
+		}
 	}
 }
 
@@ -41,24 +49,26 @@ int16_t GetMaintainigTemp() {
 
 void ChangeMaintainingTemp(int8_t value) {
 	maintaining_temperature += 100 * value;
-	if (maintaining_temperature < 2000) {
-		maintaining_temperature = 2000;
-	} else if (maintaining_temperature > 10000) {
-		maintaining_temperature = 10000;
+	if (maintaining_temperature < MINIMAL_MAINTAINING_TEMPERATURE) {
+		maintaining_temperature = MINIMAL_MAINTAINING_TEMPERATURE;
+	} else if (maintaining_temperature > MAXIMAL_MAINTAINING_TEMPERATURE) {
+		maintaining_temperature = MAXIMAL_MAINTAINING_TEMPERATURE;
 	}
 }
 
 void AddTemperature(int16_t temperature) {
 	buf[INC_PTR(write_ptr)] = temperature;
+	is_calculated = 0;
 }
 
-Desison_t AskDecision(void) {
+uint8_t GetPower(void) {
 	if (buf[write_ptr] >= maintaining_temperature) {
-		current_decison = TURN_OFF;
-		return TURN_OFF;
+		power = 0;
 	}
 
-	return (*predict_modes[current_mode_ptr].funct_ptr)();
+	return power;
+
+	//return (*predict_modes[current_mode_ptr].funct_ptr)();
 }
 
 void SelectNextMode_(void) {
@@ -69,27 +79,23 @@ PredictionMod_t* CurrentMode(void) {
 	return &predict_modes[current_mode_ptr];
 }
 
-static Desison_t NoneAdaptivePredictFunc(void) {
+static uint8_t NaivePredictFunc(void) {
 
 	int16_t temp = buf[write_ptr];
 
-	if (current_decison == TURN_ON) // heating
+	if (power >= 80) // heating
 			{
 		if (temp >= maintaining_temperature) {
-			current_decison = TURN_OFF;
-			return TURN_OFF;
+			return 0;
 		} else {
-			current_decison = TURN_ON;
-			return TURN_ON;
+			return 100;
 		}
 	} else // chilling
 	{
 		if (temp <= maintaining_temperature - 200) {
-			current_decison = TURN_ON;
-			return TURN_ON;
+			return 100;
 		} else {
-			current_decison = TURN_OFF;
-			return TURN_OFF;
+			return 0;
 		}
 	}
 }

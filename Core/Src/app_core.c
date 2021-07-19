@@ -8,15 +8,14 @@
 #include "app_core.h"
 
 static void HandleError(OW_ERROR_E error);
-static void TurnOnHeater();
-static void TurnOffHeater();
-static SetControllingPinFunc_t setCtrlPinFunc;
+static SetPowerFunc_t setPowerFunc;
 
 static int16_t temperature;
+
 static PredictionMod_t *mode;
 
-void AppRun(SetControllingPinFunc_t setCtrlPinFunc_) {
-	setCtrlPinFunc = setCtrlPinFunc_;
+void AppRun(SetPowerFunc_t setPowerFunc_) {
+	setPowerFunc = setPowerFunc_;
 
 	SendHelloMessage();
 	mode = CurrentMode();
@@ -39,8 +38,7 @@ void AppRun(SetControllingPinFunc_t setCtrlPinFunc_) {
 	}
 
 	uint8_t idx = 0;
-	Desison_t desision;
-	Desison_t last_desision = TURN_ON;
+	uint8_t power;
 
 	for (;;) {
 		int16_t new_temperature = 0;
@@ -52,18 +50,15 @@ void AppRun(SetControllingPinFunc_t setCtrlPinFunc_) {
 		} else {
 			temperature = new_temperature;
 			PrintTemperature(temperature);
-
 			SendTemperatureMessage(idx, temperature);
-			AddTemperature(temperature);
-			desision = AskDecision();
 
-			if (desision != last_desision) {
-				last_desision = desision;
-				if (desision == TURN_OFF)
-					TurnOffHeater();
-				else
-					TurnOnHeater();
-			}
+			AddTemperature(temperature);
+			power = GetPower();
+
+			setPowerFunc(power);
+			PrintPower(power);
+			SendPowerMessage(power);
+
 		}
 
 		idx = (idx + 1) % 1;
@@ -121,15 +116,5 @@ static void HandleError(OW_ERROR_E error) {
 		PrintErrorMessage("unknown error");
 	}
 
-}
-
-static void TurnOnHeater() {
-	SendActionMessage("Turn On", 8);
-	(*setCtrlPinFunc)(1);
-}
-
-static void TurnOffHeater() {
-	SendActionMessage("Turn Off", 9);
-	(*setCtrlPinFunc)(0);
 }
 

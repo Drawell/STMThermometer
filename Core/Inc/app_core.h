@@ -13,9 +13,9 @@
 #include <decision_maker.h>
 #include <outworld_informer.h>
 
-typedef void(*SetControllingPinFunc_t)(uint8_t);
+typedef void(*SetPowerFunc_t)(uint8_t);
 
-void AppRun(SetControllingPinFunc_t setCtrlPinFunc_);
+void AppRun(SetPowerFunc_t setPowerFunc_);
 
 void IncreaseMaintainingTemperature(void);
 

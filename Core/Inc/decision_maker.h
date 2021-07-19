@@ -13,11 +13,7 @@
 
 #define TEMP_BUFFER_SIZE 255
 
-typedef enum DECISION_E {
-	 TURN_OFF, TURN_ON,
-} Desison_t;
-
-typedef Desison_t (*deside_fuc_t)(void);
+typedef uint8_t (*deside_fuc_t)(void);
 
 typedef struct PredictionMod_t {
 	char* name;
@@ -35,7 +31,7 @@ void ChangeMaintainingTemp(int8_t value);
 
 void AddTemperature(int16_t temperature);
 
-Desison_t AskDecision(void);
+uint8_t GetPower(void);
 
 PredictionMod_t* CurrentMode(void);
 
