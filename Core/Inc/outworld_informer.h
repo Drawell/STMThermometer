@@ -11,11 +11,24 @@
 #include "cmsis_os.h"
 #include "decision_maker.h"
 #include "fonts.h"
+
+ #define SSD1306
+//#define LCD_1602
+
+#ifdef LCD_1602
+#include "lcd1602.h"
+#endif
+
+#ifdef SSD1306
 #include "ssd1306.h"
+#endif
+
+
 
 osMessageQId PCMessageQueueHandle;
 
-void InitOutworldInformer(UART_HandleTypeDef* uart_, uint16_t ms_timeout);
+void InitOutworldInformer(UART_HandleTypeDef *uart_, uint16_t ms_timeout,
+		I2C_HandleTypeDef *hi2c1);
 
 void StartPCSendMessageTask(void const * argument);
 

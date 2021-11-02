@@ -69,6 +69,7 @@ void AppRun(SetPowerFunc_t setPowerFunc_) {
 void IncreaseMaintainingTemperature(void)
 {
 	ChangeMaintainingTemp(1);
+	//SetPower(GetPower() + 1);
 	PrintMaintaningTemperature(GetMaintainigTemp());
 	SendMaintainingTempMessage(GetMaintainigTemp());
 }
@@ -76,6 +77,7 @@ void IncreaseMaintainingTemperature(void)
 void DecreaseMaintainingTemperature(void)
 {
 	ChangeMaintainingTemp(-1);
+	//SetPower(GetPower() - 1);
 	PrintMaintaningTemperature(GetMaintainigTemp());
 	SendMaintainingTempMessage(GetMaintainigTemp());
 }

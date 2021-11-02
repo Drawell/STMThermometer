@@ -32,6 +32,9 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+
+
+
 #include "cmsis_os.h"
 #include <ow_driver.h>
 #include <app_core.h>

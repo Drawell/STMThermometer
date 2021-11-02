@@ -32,6 +32,7 @@ void ChangeMaintainingTemp(int8_t value);
 void AddTemperature(int16_t temperature);
 
 uint8_t GetPower(void);
+void SetPower(uint8_t power_);
 
 PredictionMod_t* CurrentMode(void);
 

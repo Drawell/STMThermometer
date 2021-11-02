@@ -132,9 +132,8 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
 	OWDriverInit(&huart1, 1500);
-	InitOutworldInformer(&huart2, 1000);
+	InitOutworldInformer(&huart2, 1000, &hi2c1);
 	DecisionMakerInit(5000);
-	SSD1306_Init();
 	DIMMER_Init(&dimmer, GPIO_PIN_6, GPIO_PIN_7, GPIOA, GPIOA, &htim2);
 
 	//HAL_Delay (5000);

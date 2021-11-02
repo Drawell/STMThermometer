@@ -33,7 +33,6 @@ void DIMMER_isr_zero_ctrl_callback(DIMMER_Handle_t *hdim, uint16_t GPIO_pin) {
 			hdim->psm_cout = 0;
 			hdim->counter = 0;
 		}
-		//HAL_TIM_Base_Start_IT(hdim->timer);
 	}
 }
 

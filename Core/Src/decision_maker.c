@@ -18,21 +18,22 @@ static int16_t write_ptr = 0;
 static int16_t read_ptr = 0;
 
 static int16_t maintaining_temperature = 2000;
-static uint8_t power = 0;
+static uint8_t power = 50;
 static uint8_t is_calculated = 0;
 
 static uint8_t NaivePredictFunc(void);
+static uint8_t PIDPredictFunc(void);
 
-PredictionMod_t predict_modes[] = { { .name = "Naive", .name_size = 6,
-		.funct_ptr = &NaivePredictFunc }, { .name = "1234567890123457890",
-		.name_size = 15, .funct_ptr = &NaivePredictFunc } };
+PredictionMod_t predict_modes[] = {
+		{ .name = "PID", .name_size = 4, .funct_ptr = &PIDPredictFunc },
+		{ .name = "Naive", .name_size = 6, .funct_ptr = &NaivePredictFunc }
+		};
 
 static int16_t current_mode_ptr = 0;
 
 void StartDecisionMakerTask(void const *argument) {
 	for (;;) {
-		if (!is_calculated)
-		{
+		if (!is_calculated) {
 			power = (*predict_modes[current_mode_ptr].funct_ptr)();
 			is_calculated = 1;
 		}
@@ -67,12 +68,20 @@ uint8_t GetPower(void) {
 	}
 
 	return power;
+}
 
-	//return (*predict_modes[current_mode_ptr].funct_ptr)();
+void SetPower(uint8_t power_) {
+	/*
+	if (power_ > 100 || power_ == 0 || power_ == 255)
+		return;
+	else
+		power = power_;*/
+
 }
 
 void SelectNextMode_(void) {
-	current_mode_ptr = (current_mode_ptr + 1) % (sizeof(predict_modes) / sizeof(PredictionMod_t));
+	current_mode_ptr = (current_mode_ptr + 1)
+			% (sizeof(predict_modes) / sizeof(PredictionMod_t));
 }
 
 PredictionMod_t* CurrentMode(void) {
@@ -86,7 +95,7 @@ static uint8_t NaivePredictFunc(void) {
 	if (power >= 80) // heating
 			{
 		if (temp >= maintaining_temperature) {
-			return 0;
+			return 1;
 		} else {
 			return 100;
 		}
@@ -95,8 +104,53 @@ static uint8_t NaivePredictFunc(void) {
 		if (temp <= maintaining_temperature - 200) {
 			return 100;
 		} else {
-			return 0;
+			return 1;
 		}
 	}
+}
+
+static float kp = 5;
+static float ki = 0.45;
+static float kd = 11;
+
+static float prev_error = 0;
+static float prev_prev_error = 0;
+static float integral = 0;
+static float dt = 1.1;
+
+static uint8_t PIDPredictFunc(void) {
+	float integral = 0;
+	int16_t temp;
+	uint8_t ptr = write_ptr;
+	for (int i = 0; i < 10; i++)
+	{
+		temp = buf[ptr] / 100.;
+		if (temp != 0)
+			integral += maintaining_temperature / 100. - temp;
+		if (ptr == 0)
+			ptr = TEMP_BUFFER_SIZE;
+		ptr -= 1;
+	}
+
+	temp = buf[write_ptr];
+	float error = maintaining_temperature / 100. - temp / 100.;
+	float error_delta = 0;
+	if (prev_error != 0)
+		error_delta += (error - prev_error) / dt;
+	if (prev_prev_error != 0)
+		error_delta += (prev_error - prev_prev_error) / dt;
+
+	prev_prev_error = prev_error;
+	prev_error = error;
+	float power_ = kp * error +  ki * integral + kd * error_delta;
+
+	if (power_ >= 100.)
+		return 100;
+	else if (power <= 1)
+		return 1;
+	else
+		return (uint8_t) power_;
+
+
 }
 

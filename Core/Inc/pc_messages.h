@@ -16,15 +16,6 @@ typedef struct Message_t
 	uint8_t size;
 } Message_t;
 
-uint8_t volotile_temperature_message_text[30];
-uint8_t volotile_maintaining_temperature_message_text[30];
-uint8_t volotile_power_message_text[30];
-
-Message_t pcm_volotile_temperature_message =
-{
-	.text = &volotile_temperature_message_text,
-	.size = 30
-};
 
 Message_t pcm_hello_message =
 {
@@ -38,31 +29,36 @@ Message_t pcm_volotile_message =
 	.size = 0
 };
 
+uint8_t volotile_temperature_message_text[30];
+Message_t pcm_volotile_temperature_message =
+{
+	.text = &volotile_temperature_message_text,
+	.size = 30
+};
+
+
+uint8_t volotile_current_mode_message_text[40];
 Message_t pcm_current_mode_message =
 {
-	.text = "\n\rCurrent mode: ",
-	.size = 17
+	.text = volotile_current_mode_message_text,
+	.size = 40
 };
 
+uint8_t volotile_error_message_text[30];
 Message_t pcm_error_message =
 {
-	.text = "\n\rError: ",
-	.size = 10
+	.text = volotile_error_message_text,
+	.size = 30
 };
 
-Message_t pcm_action_message =
-{
-	.text = "\n\rAction: ",
-	.size = 11
-};
-
-
+uint8_t volotile_maintaining_temperature_message_text[30];
 Message_t pcm_maintaining_temp_message =
 {
 	.text = volotile_maintaining_temperature_message_text,
 	.size = 30
 };
 
+uint8_t volotile_power_message_text[30];
 Message_t pcm_power_message =
 {
 	.text = volotile_power_message_text,
