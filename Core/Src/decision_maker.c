@@ -64,7 +64,7 @@ void AddTemperature(int16_t temperature) {
 
 uint8_t GetPower(void) {
 	if (buf[write_ptr] >= maintaining_temperature) {
-		power = 0;
+		power = 1;
 	}
 
 	return power;
@@ -109,9 +109,9 @@ static uint8_t NaivePredictFunc(void) {
 	}
 }
 
-static float kp = 5;
-static float ki = 0.45;
-static float kd = 11;
+static float kp = 8;
+static float ki = 0.015;
+static float kd = 20;
 
 static float prev_error = 0;
 static float prev_prev_error = 0;
@@ -119,26 +119,14 @@ static float integral = 0;
 static float dt = 1.1;
 
 static uint8_t PIDPredictFunc(void) {
-	float integral = 0;
-	int16_t temp;
-	uint8_t ptr = write_ptr;
-	for (int i = 0; i < 10; i++)
-	{
-		temp = buf[ptr] / 100.;
-		if (temp != 0)
-			integral += maintaining_temperature / 100. - temp;
-		if (ptr == 0)
-			ptr = TEMP_BUFFER_SIZE;
-		ptr -= 1;
-	}
+	int16_t temp = buf[write_ptr];
 
-	temp = buf[write_ptr];
 	float error = maintaining_temperature / 100. - temp / 100.;
+	integral += error * dt;
+
 	float error_delta = 0;
-	if (prev_error != 0)
-		error_delta += (error - prev_error) / dt;
-	if (prev_prev_error != 0)
-		error_delta += (prev_error - prev_prev_error) / dt;
+	error_delta += (error - prev_error) / dt;
+	error_delta += (prev_error - prev_prev_error) / dt;
 
 	prev_prev_error = prev_error;
 	prev_error = error;
@@ -146,7 +134,7 @@ static uint8_t PIDPredictFunc(void) {
 
 	if (power_ >= 100.)
 		return 100;
-	else if (power <= 1)
+	else if (power_ <= 1)
 		return 1;
 	else
 		return (uint8_t) power_;
