@@ -12,11 +12,11 @@
 #include "decision_maker.h"
 #include "fonts.h"
 
- #define SSD1306
-//#define LCD_1602
+// #define SSD1306
+#define LCD_1602
 
 #ifdef LCD_1602
-#include "lcd1602.h"
+#include "lcd.h"
 #endif
 
 #ifdef SSD1306

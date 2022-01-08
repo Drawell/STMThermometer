@@ -24,8 +24,8 @@ void InitOutworldInformer(UART_HandleTypeDef *uart_, uint16_t ms_timeout,
 	timeout = ms_timeout;
 
 #ifdef LCD_1602
-	lcd16x2_i2c_init(hi2c1);
-#include "lcd1602.h"
+	LCD_ini();
+	LCD_Clear();
 #endif
 
 #ifdef SSD1306
@@ -59,17 +59,23 @@ void StartDisplayPrintTask(void const *argument) {
 
 #ifdef LCD_1602
 			if (volotile_error_text[0]) {
-
-				lcd16x2_i2c_printf("  Hello ");
+				LCD_SetPos(0, 0);
+				LCD_String(volotile_error_text);
 			} else {
-				lcd16x2_i2c_setCursor(0, 0);
-				lcd16x2_i2c_printf("  Hello ");
+				LCD_SetPos(0, 0);
+				sprintf(volotile_screen_text, "%d.%d / %d.%d  ",
+						temperature_ / 100, temperature_ % 100, maintaining_temperature_ / 100, maintaining_temperature_% 100);
+				LCD_String(volotile_screen_text);
+				sprintf(volotile_screen_text, "%d \%   \0", power_);
+
+				LCD_SetPos(0, 1);
+				LCD_String(volotile_screen_text);
+
 			}
 #endif
 
 #ifdef SSD1306
 			if (volotile_error_text[0]) {
-
 				SSD1306_GotoXY(0, 0);
 				SSD1306_Puts(volotile_error_text, &Font_7x10, 1);
 			} else {
@@ -97,7 +103,7 @@ void StartDisplayPrintTask(void const *argument) {
 #endif
 		}
 
-		osDelay(200);
+		osDelay(500);
 	}
 }
 void PrintTemperature(int16_t temperature) {
@@ -124,8 +130,8 @@ void SendHelloMessage() {
 }
 
 void SendTemperatureMessage(uint8_t sensor_idx, int16_t temperature) {
-	sprintf(&volotile_temperature_message_text, "\n\rTemp: %d: %d\n\0", sensor_idx,
-			temperature);
+	sprintf(&volotile_temperature_message_text, "\n\rTemp: %d: %d\n\0",
+			sensor_idx, temperature);
 	osMessagePut(PCMessageQueueHandle, &pcm_volotile_temperature_message, 0);
 }
 
@@ -135,7 +141,8 @@ void SendCurrentModMessage(char *mod_name, uint8_t name_size) {
 	//osMessagePut(PCMessageQueueHandle, &pcm_current_mode_message, 0);
 	//osMessagePut(PCMessageQueueHandle, &pcm_volotile_message, 0);
 
-	sprintf(&volotile_current_mode_message_text, "\n\rCurrent mode: %s\n\0", mod_name);
+	sprintf(&volotile_current_mode_message_text, "\n\rCurrent mode: %s\n\0",
+			mod_name);
 	osMessagePut(PCMessageQueueHandle, &pcm_current_mode_message, 0);
 
 }
